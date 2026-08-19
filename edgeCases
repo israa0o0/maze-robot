@@ -1,0 +1,77 @@
+import rclpy
+from rclpy.node import Node
+from nav_msgs.msg import Odometry
+from rclpy.action import ActionServer
+from maze_interfaces.action import Goal 
+
+class receiver(Node):
+    def __init__(self):
+        super().__init__('odom_data')
+        self.subscription = self.create_subscription(
+            Odometry,
+            '/odom',
+            self.odom_callback,
+            10)
+
+        self.current_position = None
+        self.last_time = None 
+
+        self._action_server = ActionServer(
+            self,
+            Goal,
+            'move_robot',
+            self.execute_callback
+        )
+
+        # self.check_goal
+        # self.check_timeout
+
+    def odom_callback(self, msg):
+        self.get_logger().info(f'Received odometry data: {msg}')
+        self.current_position = msg.pose.pose.position
+        self.last_time = self.get_clock().now()
+
+
+    def execute_callback(self, goal_handle):
+       self.get_logger().info("Receiving odometry data…") 
+
+       result = Goal.Result()
+
+       while rclpy.ok():
+           if self.check_timeout(goal_handle):
+               self.get_logger().info("Timeout reached! Aborting action....")
+               goal_handle.abort()
+               result.success = False
+               return result
+
+           if self.check_goal(goal_handle): 
+               self.get_logger().info("Goal reached! Completing action....")  
+               goal_handle.succeed()
+               result.success = True
+               return result
+
+
+    def check_goal(self, goal_handle):
+        if self.current_position is None:
+            self.get_logger().info("No odometry data received yet.")
+            return False
+        
+        target_position = goal_handle.request.target_position
+        if (abs(self.current_position.x - target_position.x) < 0.1 and
+            abs(self.current_position.y - target_position.y) < 0.1):
+            self.get_logger().info("Goal reached!")
+            return True
+        else:
+            self.get_logger().info("Goal not reached yet.")
+            return False
+
+    def check_timeout(self, goal_handle):
+        if self.last_time is None:
+            return False
+        
+        current_time = self.get_clock().now()
+        elapsed_time = (current_time - self.last_time).nanoseconds / 1e9  
+        if elapsed_time > 3.0: 
+            self.get_logger().info("Timeout reached. No odometry data received for 3 seconds.")
+            return True
+        return False
