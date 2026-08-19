@@ -1,0 +1,7 @@
+float32 forward_distance
+---
+bool success
+string message
+---
+string current_action
+float32 progress
