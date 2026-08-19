@@ -1,0 +1,14 @@
+#goal
+
+float64 angle
+
+---
+
+#Result
+float64 final_angle
+bool success
+
+---
+
+#Feedback
+float64 current_angle
