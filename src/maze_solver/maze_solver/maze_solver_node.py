@@ -105,29 +105,37 @@ class MazeSolver (Node):
             ) 
 
     def solve_maze(self):
-        if not self.yaw(-1.55):
-            self.get_logger().error("Maze stopped: yaw failed")
-            return
-
         self.get_logger().info("Starting maze solution")
-        if not self.move_x(1.0):
-            self.get_logger().error("Maze stopped: X movement failed")
-            return
-
-        self.get_logger().info("X movement completed")
-
-        if not self.yaw(1.5):
-            self.get_logger().error("Maze stopped: yaw failed")
-            return
-
-        self.get_logger().info("Yaw completed")
-        if not self.move_x(1.0):
-            self.get_logger().error("Maze stopped: X movement failed")
-            return
-
-        self.get_logger().info("X movement completed")
-        
+        self.yaw(1.5708)
+        self.move_x(3.0)
+        self.yaw(1.5708)
         self.get_logger().info("Maze solution completed!")
+
+
+        
+        # if not self.yaw(-1.55):
+        #     self.get_logger().error("Maze stopped: yaw failed")
+        #     return
+
+        # self.get_logger().info("Starting maze solution")
+        # if not self.move_x(1.0):
+        #     self.get_logger().error("Maze stopped: X movement failed")
+        #     return
+
+        # self.get_logger().info("X movement completed")
+
+        # if not self.yaw(1.5):
+        #     self.get_logger().error("Maze stopped: yaw failed")
+        #     return
+
+        # self.get_logger().info("Yaw completed")
+        # if not self.move_x(1.0):
+        #     self.get_logger().error("Maze stopped: X movement failed")
+        #     return
+
+        # self.get_logger().info("X movement completed")
+        
+        # self.get_logger().info("Maze solution completed!")
 
 
 
