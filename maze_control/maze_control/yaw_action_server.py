@@ -137,7 +137,7 @@ class YawActionServer(Node):
             rate.sleep()
 
         # Stop robot
-        
+        twist.linear.x = 0.0
         twist.angular.z = 0.0
 
         self.cmd_vel_publisher.publish(twist)
