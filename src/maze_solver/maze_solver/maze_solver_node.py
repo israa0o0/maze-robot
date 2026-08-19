@@ -104,14 +104,20 @@ class MazeSolver (Node):
                 f'Failed'
             ) 
 
-# #  test
+    def solve_maze(self):
+        self.get_logger().info("Starting maze solution")
+        self.move_x(1.0)
+        self.yaw(1.5708)
+        self.get_logger().info("Maze solution completed!")
+
+
+
 def main(args=None):
     rclpy.init(args=args)
 
     node = MazeSolver()
 
-    # Test: rotate 90 degrees
-    node.yaw(90.0)
+    node.solve_maze()
 
     rclpy.spin(node)
 
