@@ -3,7 +3,7 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 
 from robot_movement.action import Movement
-
+from maze_control.action import RotateRobotYaw
 
 class MazeSolver (Node):
     def __init__(self):
@@ -13,6 +13,12 @@ class MazeSolver (Node):
             self,
             Movement,
             'movement_x'
+        )
+
+        self.yaw_client = ActionClient(
+            self,
+            RotateRobotYaw,
+            'rotate_robot_yaw'
         )
 
     def move_x(self, distance):
@@ -40,9 +46,7 @@ class MazeSolver (Node):
             return
 
         self.get_logger().info('Goal accepted!')
-
         result_future = goal_handle.get_result_async()
-
         result_future.add_done_callback(
             self.result_callback
         )
@@ -58,14 +62,56 @@ class MazeSolver (Node):
                 f'Failed: {result.message}'
             )
 
+    def yaw(self, angle):
+        self.get_logger().info(f'sending yaw goal: {angle}')
+        self.yaw_client.wait_for_server()
+        goal = RotateRobotYaw.Goal()
+        goal.angle = angle
+        self.get_logger().info('sending goal...')
+        send_goal_future = self.yaw_client.send_goal_async(
+            goal,
+            feedback_callback = self.feedback_callback_y
+        )
+        send_goal_future.add_done_callback(
+            self.goal_response_callback_y
+        )
 
+    def feedback_callback_y(self, feedback):
+        fdb_msg = feedback.feedback
+        fdb_msg.current_angle
+        self.get_logger().info(f"feedback: {fdb_msg}")
+
+    def goal_response_callback_y(self, future):
+        goal_handle = future.result()
+        if not goal_handle.accepted:
+            self.get_logger().error('Goal rejected!')
+            return
+
+        self.get_logger().info('Goal accepted!')
+        result_future = goal_handle.get_result_async()
+        result_future.add_done_callback(
+            self.result_callback_y
+        )
+
+    def result_callback_y (self, future):
+        result = future.result().result
+        if result.success:
+            self.get_logger().info(
+                f'Success'
+            )
+        else:
+            self.get_logger().error(
+                f'Failed'
+            ) 
+
+# #  test
 def main(args=None):
     rclpy.init(args=args)
 
     node = MazeSolver()
 
-    # Test: move forward 1 meter
-    node.move_x(1.0)
+    # Test: rotate 90 degrees
+    node.yaw(90.0)
 
     rclpy.spin(node)
 
